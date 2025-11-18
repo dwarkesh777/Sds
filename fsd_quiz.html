@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSD MCQ Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/175926715?s=400&u=3120031e9ae3b66e1814792ba36a5599a1d251bb&v=4" type="image/png">
+  
+   <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        pre.code-block {
+          background: #f5f5f5;
+          padding: 10px;
+          font-size: 16px;
+          border-radius: 6px;
+          font-family: monospace;
+          white-space: pre-wrap;  /* wrap long lines */
+          word-wrap: break-word;  /* break long words */
+          overflow-x: auto;       /* scroll only if really long */
+          line-height: 1.5;
+          margin: 10px 0;
+          text-align: left;
+        }
+
+        /* --- Loader Styles --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #111827; /* Dark background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loader-content {
+            text-align: center;
+        }
+
+        .loader-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .loader-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #3b82f6; /* Blue */
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- General Styles --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Test Mode Option Styles --- */
+        .option-btn {
+            background-color: white;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+        }
+        .option-btn:hover:not(:disabled) {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .option-btn.correct {
+            background-color: #22c55e !important;
+            border-color: #16a34a !important;
+            color: white !important;
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important;
+            border-color: #dc2626 !important;
+            color: white !important;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <script type="module">
+  const firebaseConfig = {
+  apiKey: "AIzaSyAA9WGhpWt5rfBsN0rIThp_Vd9gwwJlJwY",
+  authDomain: "website-mcq-5d390.firebaseapp.com",
+  projectId: "website-mcq-5d390",
+  storageBucket: "website-mcq-5d390.firebasestorage.app",
+  messagingSenderId: "792788612285",
+  appId: "1:792788612285:web:34f17eede0307ee65233d4",
+  measurementId: "G-Q1ZXF235FM"
+};
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) location.href = "login.html";
+  });
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = 'login.html';
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (snap.exists()) {
+    const data = snap.data();
+    // example: create small badge
+    let el = document.getElementById('user-id-display');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'user-id-display';
+      el.className = 'fixed top-4 left-4 bg-white p-2 rounded shadow text-sm z-50';
+      document.body.appendChild(el);
+    }
+    el.textContent = `User ID: ${data.publicId} — ${user.email}`;
+  }
+});
+  window.logout = () =>
+    signOut(auth).then(() => location.href = "login.html").catch(console.error);
+</script>
+
+<!-- logout button -->
+<button onclick="logout()"
+        class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 z-50">
+  Logout
+</button>
+ <div id="loader">
+        <div class="loader-content">
+            <img src="https://avatars.githubusercontent.com/u/175926715?s=400&u=3120031e9ae3b66e1814792ba36a5599a1d251bb&v=4" 
+                 alt="Dwarkesh Profile Image" 
+                 class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-600"
+                 id="loader-image">
+            
+            <div class="loader-logo">D S SAVALIYA</div>
+            <div class="loader-spinner"></div>
+        </div>
+    </div>
+
+    <div class="main-container">    
+    <div class="main-container">
+
+        <div id="menu-screen">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-slate-900 mb-2">FSD-1 MCQ Portal</h1>
+                <p class="text-lg text-slate-600">Choose a mode to get started</p>
+            </header>
+            <div class="grid md:grid-cols-2 gap-8">
+                <button onclick="showScreen('view-mode')" class="btn bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-left">
+                    <h2 class="text-2xl font-semibold text-blue-600 mb-2">View FSD-1 MCQs</h2>
+                    <p class="text-slate-500">Practice mode. Review all questions (Units 4 & 5) with their options and correct answers revealed.</p>
+                </button>
+                <button onclick="showScreen('test-mode')" class="btn bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-left">
+                    <h2 class="text-2xl font-semibold text-green-600 mb-2">FSD-1 MCQ Test</h2>
+                    <p class="text-slate-500">Test your knowledge. Answer questions (Units 4 & 5) and get immediate feedback.</p>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-mode-screen" class="hidden">
+             <header class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-slate-900">Practice Questions (Units 4 & 5)</h1>
+                <button onclick="showScreen('menu')" class="btn bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md">Back to Menu</button>
+            </header>
+            <div id="view-questions-container" class="space-y-6">
+                </div>
+        </div>
+
+        <div id="test-mode-screen" class="hidden">
+            <header class="mb-8">
+                 <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-3xl font-bold text-slate-900">FSD-1 MCQ Test (Units 4 & 5)</h1>
+                    <button onclick="showScreen('menu')" class="btn bg-slate-200 text-slate-800 font-semibold py-2 px-5 rounded-lg">Exit Test</button>
+                 </div>
+                 <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-center text-sm text-slate-500 mt-2">Question 1/88</p>
+            </header>
+
+            <div id="test-card" class="bg-white p-8 rounded-2xl shadow-lg">
+                 </div>
+            
+            <div id="test-results" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Test Complete!</h2>
+                <p class="text-5xl font-bold text-blue-600 mb-6" id="score-text">10/88</p>
+                <div class="flex justify-center gap-4">
+                     <button onclick="startTest()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg">Restart Test</button>
+                     <button onclick="showScreen('menu')" class="btn bg-slate-600 text-white font-bold py-3 px-6 rounded-lg">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 w-full text-center py-4 text-sm text-slate-500 bg-slate-100">
+        Created by: D S SAVALIYA
+    </footer>
+
+    <script>
+               
+// === QUESTIONS FROM PB_FSD-1_SEM-III_2025 (1).pdf - Unit 4 & 5 ===
+const questions = [
+    {"No": "195", "question_text": "In the below code snippet, in what order will the margins be added?\np {margin: 25px 50px 75px 100px; }", "MCQ Answer": "B", "option A": "Top, left, right, bottom", "option B": "Top, Right, Bottom, Left", "option C": "Top, bottom, right, Left", "option D": "Left, Right, Bottom, top"},
+    {"No": "196", "question_text": "Which CSS selectors are used to specify a group of elements?", "MCQ Answer": "B", "option A": "id", "option B": "class", "option C": "tag", "option D": "attribute"},
+    {"No": "197", "question_text": "Which of the following is/are not a pseudo element?", "MCQ Answer": "D", "option A": "::first-word", "option B": "::first-letter", "option C": "::select", "option D": "Only (A) and (C)"},
+    {"No": "198", "question_text": "______property renders 1st letters of all words capital.", "MCQ Answer": "B", "option A": "text-decoration", "option B": "text-transform", "option C": "text-variant", "option D": "text-capitalize"},
+    {"No": "199", "question_text": "Which CSS property is used to make the text bold?", "MCQ Answer": "C", "option A": "text-align: bold", "option B": "text-decoration: bold", "option C": "font-weight: bold", "option D": "font-style: bold"},
+    {"No": "200", "question_text": "What will be the output of below mentioned code snippet?\np strong {background-color: yellow;}", "MCQ Answer": "A", "option A": "Strong element within a p \nelement have a yellow \nbackground", "option B": "Strong element out side p \nelement have yellow \nbackground", "option C": "Both p and strong have \nyellow background", "option D": "both (a) and (c) are true"},
+    {"No": "201", "question_text": "Which of the following selectors select direct descendants?", "MCQ Answer": "D", "option A": "OL<B", "option B": "OL B", "option C": "OL ~ B", "option D": "OL>B"},
+    {"No": "202", "question_text": "Which one is the correct syntax to link an external style sheet in the HTML file?", "MCQ Answer": "C", "option A": "<link src=”demo.css” type=”stylesheet”/>", "option B": "<style src=”demo.css” type=”stylesheet”/>", "option C": "<link href=”demo.css” rel=”stylesheet”/>", "option D": "<style href=”demo.css” rel=”stylesheet”/>"},
+    {"No": "203", "question_text": "The CSS property that is primarily used for giving a line over a text would be:", "MCQ Answer": "B", "option A": "text-rule:underline;", "option B": "text-decoration:overline;", "option C": "text-rule:overline;", "option D": "text-decoration:underline;"},
+    {"No": "204", "question_text": "Which is the correct inline CSS for p tag to define paragraph's text and background colors?", "MCQ Answer": "D", "option A": "<p css=\"color: red; \nbackground-color: \nyellow;\">", "option B": "<p type=\"color: red; \nbackground-color: \nyellow;\">", "option C": "<p inline=\"color: red; \nbackground-color: \nyellow;\">", "option D": "<p style=\"color: red; \nbackground-color: \nyellow;\">"},
+    {"No": "205", "question_text": "If you want to use a green dotted border around an image, which CSS property is used for that?", "MCQ Answer": "D", "option A": "border-style", "option B": "border-color", "option C": "border-decoration", "option D": "Both A and B"},
+    {"No": "206", "question_text": "What does 'padding: 50px 20px;' specifies?", "MCQ Answer": "D", "option A": "top padding is 50px", "option B": "bottom padding is 20px", "option C": "right padding is 20px", "option D": "Both A and C"},
+    {"No": "207", "question_text": "What is CSS?", "MCQ Answer": "D", "option A": "CSS is a style sheet language", "option B": "CSS is the language used to style the HTML documents", "option C": "CSS is designed to separate \nthe presentation and \ncontent, including layout, \ncolors, and fonts", "option D": "All the mentioned"},
+    {"No": "208", "question_text": "Which has introduced text, list, box, margin, border, color, and background properties?", "MCQ Answer": "B", "option A": "PHP", "option B": "CSS", "option C": "HTML", "option D": "Ajax"},
+    {"No": "209", "question_text": "Select the CSS property that sets the width of an element’s bottom border.", "MCQ Answer": "B", "option A": "border-width-down", "option B": "border-bottom-width", "option C": "border-width", "option D": "border-bottom"},
+    {"No": "210", "question_text": "Which CSS property sets the color of an element’s all borders?", "MCQ Answer": "A", "option A": "border-color", "option B": "border-background", "option C": "border-background-color", "option D": "border-bgcolor"},
+    {"No": "211", "question_text": "Which is not the property of the CSS box model?", "MCQ Answer": "C", "option A": "margin", "option B": "padding", "option C": "color", "option D": "border"},
+    {"No": "212", "question_text": "Which property adds padding to the top of an element?", "MCQ Answer": "C", "option A": "padding-height", "option B": "height", "option C": "padding-top", "option D": "top"},
+    {"No": "213", "question_text": "Which property sets a consistent margin on all four sides of the affected element?", "MCQ Answer": "C", "option A": "padding", "option B": "border", "option C": "margin", "option D": "none of the mentioned"},
+    {"No": "214", "question_text": "Which of the following are parts of the CSS box model?", "MCQ Answer": "D", "option A": "Padding", "option B": "Borders", "option C": "Margin", "option D": "All of the mentioned"},
+    {"No": "215", "question_text": "Which CSS property is used to set the color of the text?", "MCQ Answer": "C", "option A": "pallet", "option B": "text-decoration", "option C": "color", "option D": "colour"},
+    {"No": "216", "question_text": "Which of the following are valid ways to represent a colour in CSS?", "MCQ Answer": "D", "option A": "RGB Values", "option B": "HEX Values", "option C": "A valid color name", "option D": "All of the mentioned"},
+    {"No": "217", "question_text": "Which of the following property sets an element’s background color?", "MCQ Answer": "C", "option A": "background-position", "option B": "background-image", "option C": "background-color", "option D": "background-colors"},
+    {"No": "218", "question_text": "Which CSS property sets what kind of line decorations are added to an element, such as underlines, overlines, etc?", "MCQ Answer": "B", "option A": "text-decoration-link", "option B": "text-decoration", "option C": "text-line", "option D": "text-style"},
+    {"No": "219", "question_text": "How can we specify the spacing between each letter in a text in CSS?", "MCQ Answer": "A", "option A": "letter-spacing", "option B": "alpha-spacing", "option C": "character-spacing", "option D": "None of the mentioned"},
+    {"No": "220", "question_text": "What type of CSS is the following code snippet?\n<h1 style=\"color:blue;\">A Blue Heading</h1>", "MCQ Answer": "A", "option A": "Inline", "option B": "Internal", "option C": "External", "option D": "None of the mentioned"},
+    {"No": "221", "question_text": "Which HTML tag is used to declare internal CSS?", "MCQ Answer": "C", "option A": "<link>", "option B": "<script>", "option C": "<style>", "option D": "None of the mentioned"},
+    {"No": "222", "question_text": "Which tag is used to embed css in html page?", "MCQ Answer": "B", "option A": "<!DOCTYPE html>", "option B": "<style>", "option C": "<css>", "option D": "<script>"},
+    {"No": "223", "question_text": "Which CSS property sets the font size of text?", "MCQ Answer": "B", "option A": "text-size", "option B": "font-size", "option C": "size", "option D": "text"},
+    {"No": "224", "question_text": "Which CSS Property controls how an element is positioned?", "MCQ Answer": "A", "option A": "position", "option B": "static", "option C": "set", "option D": "fix"},
+    {"No": "225", "question_text": "Which of the following are valid CSS position property values?", "MCQ Answer": "D", "option A": "relative", "option B": "static", "option C": "fixed", "option D": "All of the mentioned"},
+    {"No": "226", "question_text": "What type of selector is used in this case?\np {line-height: 150%;}", "MCQ Answer": "D", "option A": "id Selectors", "option B": "Attribute Selector", "option C": "class Selectors", "option D": "element Selector"},
+    {"No": "227", "question_text": "How can we select an element with a specific ID in CSS?", "MCQ Answer": "B", "option A": ".", "option B": "#", "option C": "^", "option D": "None of the mentioned"},
+    {"No": "228", "question_text": "How can we select an element with a specific Class in CSS?", "MCQ Answer": "A", "option A": ".", "option B": "#", "option C": "^", "option D": "None of the mentioned"},
+    {"No": "229", "question_text": "Which of the following CSS selector is used to specify a rule to bind a particular unique element?", "MCQ Answer": "A", "option A": "id", "option B": "class", "option C": "tag", "option D": "bind"},
+    {"No": "230", "question_text": "Which of the following CSS style property is used to specify an italic text?", "MCQ Answer": "C", "option A": "Fonts", "option B": "style", "option C": "font-style", "option D": "font-weight"},
+    {"No": "231", "question_text": "Which is the correct way to apply CSS Styles?", "MCQ Answer": "D", "option A": "inside an HTML element", "option B": "in an external CSS file", "option C": "inside the <head> section of an HTML page", "option D": "All the mentioned"},
+    {"No": "232", "question_text": "Setting an inline-block in CSS requires which one of the following properties?", "MCQ Answer": "B", "option A": "position", "option B": "display", "option C": "visibility", "option D": "text-align"},
+    {"No": "233", "question_text": "___________ syntax helps to put an image before the content starts?", "MCQ Answer": "B", "option A": "content: (“e:/image/17.jpg”);", "option B": "content:url(“e:/image/17.jpg”);", "option C": "background:url (“e:/image/17.jpg”);", "option D": "image:url(“e:/image/17.jpg”);"},
+    {"No": "234", "question_text": "Which of the following collection of statements are used to render bold, italic and verdana fonts.", "MCQ Answer": "D", "option A": "font:verdana; font \nstyle:bold; font \nweight:italic;", "option B": "font-style:verdana; font \nfamily:italic;\nfont-style: \nbold;", "option C": "font-family:verdana; font \nstyle:bold; font \nweight:italic;", "option D": "font-family:verdana; font \nstyle:italic; font \nweight:bold;"},
+    {"No": "235", "question_text": "Consider following statements and their interpretations. Which is/are true?\n(1)margin-right:40px; This assigns margin from right side only.\n(2) margin:10px 30px: This assigns 10px margin from left-right and 30px margin from top-bottom.\n(3) margin:auto; This arranges entire element at center horizontally including its border.", "MCQ Answer": "D", "option A": "Only 1", "option B": "Only 2", "option C": "Only 3", "option D": "Only 1 & 3"},
+    {"No": "236", "question_text": "The following example inserts an image after the content of each <h1> element.", "MCQ Answer": "B", "option A": "h1:after {content: src(smiley.gif);}", "option B": "h1::after {content: url(smiley.gif);}", "option C": "h1::after {content: src(smiley.gif);}", "option D": "h1.:after {content: url(smiley.gif);}"},
+    {"No": "237", "question_text": "What will be the output of the following CSS code?\ndiv {\n  border-width:5px; \n  border-style:dotted solid double dashed;\n }", "MCQ Answer": "B", "option A": "Box having dotted top \noutline, solid left outline, \ndouble bottom outline and \ndashed right outline", "option B": "Box having dotted top \noutline, solid right outline, \ndouble bottom outline and \ndashed left outline", "option C": "Box having dotted bottom \noutline, solid left outline, \ndouble top outline and \ndashed left outline", "option D": "Box having dotted bottom \noutline, solid right outline, \ndouble top outline and \ndashed left outline"},
+    {"No": "238", "question_text": "What will be the output of following CSS code snippet? \nh1 {color: red text-decoration: underline;\nfont-style: italic;}", "MCQ Answer": "C", "option A": "text-decoration: underline and font-style: italic works", "option B": "color: red, text-decoration: underline works", "option C": "only font-style: italic works", "option D": "color: red, text-decoration: underline and font-style: italic all works"},
+    {"No": "239", "question_text": "How do you select all p elements inside a div element?", "MCQ Answer": "D", "option A": "div", "option B": "div +p", "option C": "div .p", "option D": "div p"},
+    {"No": "240", "question_text": "How will you make all paragraph elements “BLUE” in color?", "MCQ Answer": "C", "option A": "p.all{color:rgb(255,0,0);}", "option B": "p.all{color:#ff0000;}", "option C": "p {color:blue;}", "option D": "all.p {color: rgb(255,0,0);}"},
+    {"No": "241", "question_text": "In CSS, “font-size” can be called as?", "MCQ Answer": "D", "option A": "selector", "option B": "rule", "option C": "class", "option D": "property-name"},
+    {"No": "242", "question_text": "Which property is used to change the font of an element?", "MCQ Answer": "D", "option A": "font-style", "option B": "font-weight", "option C": "font-bold", "option D": "font-family"},
+    {"No": "243", "question_text": "What are the uses of CSS pseudo-elements?", "MCQ Answer": "D", "option A": "Style specified parts of an element.", "option B": "Style first line of an element.", "option C": "Content can be inserted before & after an element.", "option D": "All are correct"},
+    {"No": "244", "question_text": "Which of the right syntax for text-transform?", "MCQ Answer": "B", "option A": "<p \nstyle=”transform:caps;”>he\nllo</p> ", "option B": "<p style=”text \ntransform:uppercase;”>hell\no</p>", "option C": "<p style=”text \ntransform:bold;”>hello</p>", "option D": "<p style=”text \ntransform:line \nthrough;”>hello</p>"},
+    {"No": "245", "question_text": "Which of the following is the correct syntax to display the hyperlinks without any underline?", "MCQ Answer": "C", "option A": "<a \nhref=\"http://www.gmail.co\nm\" style=\"text \ndecoration:underline\">gmai\nl</a>", "option B": "<a \nhref=\"http://www.gmail.co\nm\" style=\"text \ndecoration:overline\">gmail\n</a>", "option C": "<a \nhref=\"http://www.gmail.co\nm\" style=\"text \ndecoration:none\">gmail</a\n>", "option D": "<a \nhref=\"http://www.gmail.co\nm\" style=\"text \ndecorate:line\">gmail</a>"},
+    {"No": "246", "question_text": "Which of the following is correct syntax for vertically repeated background-image inweb page with pink background color?", "MCQ Answer": "C", "option A": "background: pink url(“img_tree.png”) repeat x;", "option B": "background: pink content(“img_tree.png”) repeat-x;", "option C": "background: pink url(“img_tree.png”) repeat y;", "option D": "background: pink content(“img_tree.png”) norepeat;"},
+    {"No": "247", "question_text": "Which of the following property defines in a shorthand form the width, style, and color for the top border of an element?", "MCQ Answer": "A", "option A": "border-top", "option B": "border-width", "option C": "border-height", "option D": "border-style"},
+    {"No": "248", "question_text": "What will be the output of the following code.\n<style>\n  p{\n  border-color:black orange;\n  border-style: double solid;\n  }\n </style>\n <p>hello</p>", "MCQ Answer": "B", "option A": "paragraph having solid top \n& bottom border in black \ncolor, double left & right \nborder in orange color", "option B": "paragraph having double \ntop & bottom border in \nblack color, solid left & \nright border in orange color", "option C": "paragraph having double \ntop & bottom border in \norange color, solid left & \nright border in black color", "option D": "paragraph \nhaving solid top \n& bottom border in orange \ncolor, double left & right \nborder in black color"},
+    {"No": "249", "question_text": "What will be the total width of the div element given below?\ndiv {\n width: 310px;\n padding: 20px;\n border: 5px solid blue;\n margin: 0;\n}", "MCQ Answer": "D", "option A": "310px", "option B": "320px", "option C": "340px", "option D": "360px"},
+    {"No": "250", "question_text": "The _____________ attribute is used to define the name(s) of the class(es) to which a particular tag belongs.", "MCQ Answer": "B", "option A": "element", "option B": "class", "option C": "id", "option D": "attribute"},
+    {"No": "251", "question_text": "What does the CSS box-shadow property do?", "MCQ Answer": "B", "option A": "Adds padding to an element", "option B": "Adds one or more shadows around an element’s box", "option C": "Sets the border color of an element", "option D": "Applies a gradient background"},
+    {"No": "252", "question_text": "Which is the correct syntax for a descendant selector in CSS?", "MCQ Answer": "B", "option A": ".container > p", "option B": ".container p", "option C": ".container + p", "option D": "p.container"},
+    {"No": "253", "question_text": "How do you select elements that are not of a specific class, for example, elements not having the class inactive?", "MCQ Answer": "D", "option A": ":not(inactive)", "option B": ":not(:inactive)", "option C": ".not(.inactive)", "option D": "*:not(.inactive)"},
+    {"No": "254", "question_text": "Identify the correct code to apply 20px vertical margin & centering the element horizontally within its block.", "MCQ Answer": "C", "option A": "div {margin: auto;}", "option B": "div {margin: auto 20px;}", "option C": "div {margin: 20px auto;}", "option D": "div {margin-top: auto;\nmargin-left: 20px;}"},
+    {"No": "255", "question_text": "Which of the correct syntax for horizontally repeated background-image in web page?", "MCQ Answer": "D", "option A": "body { background imag:url(“o.jpg”); }", "option B": "body {background image:url(“o.jpg”); repeat x;}", "option C": "body {background image:url(“o.jpg”);\nrepeat img:repeat-y;}", "option D": "body {background \nimage:url(“o.jpg”); \nbackground-repeat:repeat \nx;}"},
+    {"No": "284", "question_text": "The CSS property used to specify the transparency of an element is –", "MCQ Answer": "D", "option A": "overlay", "option B": "hover", "option C": "clearfix", "option D": "opacity"},
+    {"No": "285", "question_text": "Which is the correct way to stretch a section half horizontally & double vertically.", "MCQ Answer": "B", "option A": "scale(2,0.5)", "option B": "scale(0.5,2)", "option C": "scaleX(2);scaleY(0.5)", "option D": "both (a) and(c)"},
+    {"No": "286", "question_text": "Which of the following CSS property is used to indicate an animation plays in reverse?", "MCQ Answer": "C", "option A": "animation-count", "option B": "animation-iteration", "option C": "animation-direction", "option D": "animation-state"},
+    {"No": "287", "question_text": "__________is the valid syntax to execute rounded image.", "MCQ Answer": "C", "option A": "img{border-type:5px;}", "option B": "img{border:5px;}", "option C": "img{border-radius:5px;}", "option D": "img{border-width:5px;}"},
+    {"No": "288", "question_text": "______ is the valid statement to run an animation in one way only for 3 times in forward direction.", "MCQ Answer": "C", "option A": "animation-iteration:3; \nanimation-way:reverse;", "option B": "animation-count:3; \nanimation \ndirection:forward;", "option C": "animation-iteration \ncount:3; animation \ndirection:forward;", "option D": "animation-iteration \ncount:finite; animation \ndirection:normal;"},
+    {"No": "289", "question_text": "_____ is the valid statement to fadeout more than one colors from a center point of a circle.", "MCQ Answer": "C", "option A": "background-color:radial \ngradient(red,yellow,green)", "option B": "background-color:radial \ngradient(circle,red,yellow,g\nreen)", "option C": "background-image:radial \ngradient(circle,red,yellow,g\nreen)", "option D": "background-image:conic \ngradient(circle,red,yellow,g\nreen)"},
+    {"No": "290", "question_text": "Add a 2 second transition effect for width and height changes of the <div> element.\n<style>\n div \n {\n  width: 100px;\n  height: 100px;\n  background-color: red; : ; \n }\n div:hover \n {\n  width: 300px;\n  height: 300px;\n }\n </style>\n <body>\n  <div>This is a div</div>\n </body>", "MCQ Answer": "A", "option A": "transition: width 2s, height \n2s; ", "option B": "transition-transform: width \n2s, height 2s;", "option C": "transition: width:2s, \nheight:2s;", "option D": "transform: width 2s, height \n2s;"},
+    {"No": "291", "question_text": "Which is correct syntax from following, to set a linear gradient, transitioning from “blue” to \n\"yellow\"?", "MCQ Answer": "A", "option A": "background-image: linear gradient(blue,yellow);", "option B": "backgroundimage: linear gradient(blue,yellow);", "option C": "background-image: lineargradient(blue,yellow);", "option D": "background-image: linear gradient (from blue, to yellow);"},
+    {"No": "292", "question_text": "Set a linear gradient background for the <div> element gradient that starts at top left (and goes to \nbottom right), transitioning from \"white\" to \"green\".\n<style>\n div { \n  _____________________ : ( , , );\n }\n </style>\n <body>\n  <div style=\"height:200px\"></div>\n </body>", "MCQ Answer": "C", "option A": "background-image: linear \ngradient(to right, white, \ngreen);", "option B": "background-color:linear \ngradient(to left right, white, \ngreen);", "option C": "background-image: linear \ngradient(to bottom right, \nwhite, green);", "option D": "background-image: linear \ngradient(to bottom right, \ngreen, white);"},
+    {"No": "293", "question_text": "How to set a background for the <div> element, which rotate color around a center point?", "MCQ Answer": "D", "option A": "background-color:linear \ngradient(red,yellow,green,b\nlue);", "option B": "background-image:linear \ngradient(red,yellow,green,b\nlue);", "option C": "background-color:conic \ngradient(red,yellow,green,b\nlue);", "option D": "background-image:conic \ngradient(red,yellow,green,b\nlue);"},
+    {"No": "294", "question_text": "Which of the following property defines the style of the rule between columns in a multicolumn text flow?", "MCQ Answer": "C", "option A": "column-style", "option B": "column-style-gap", "option C": "column-rule-style", "option D": "column-rule-flow"},
+    {"No": "295", "question_text": "The <div> element has specified a transition effect for the width property within 8 seconds.\nGive \nthe correct syntax for the same.", "MCQ Answer": "D", "option A": "div {transition-dealy: width \n8s;}", "option B": "div {transition-type: width;\ntransition-delay:8s;}", "option C": "div {transition: width; \ntransition-delay:8s;}", "option D": "div {transition: width 8s;}"},
+    {"No": "296", "question_text": "______ is the correct way to divide a paragraph in columns like newspaper.", "MCQ Answer": "D", "option A": "column-no:3; column \nspace:30px; column-rule \nstyle: dashed;", "option B": "column:3; column \nspace:30px; column-line: \ndashed;", "option C": "column-no:3; column \nspacing:30px; column-rule \nstyle: dashed;", "option D": "column-count:3; column \ngap:30px;\ncolumn-rule \nstyle: dashed;"},
+    {"No": "297", "question_text": "Set a radial gradient background for the <div> element, transitioning from \"white\" to \"green\", in a \ncircle shape.\n<style>\n div {\n  background-image: radial-gradient( ___ , _____ , ____ );\n }\n </style>\n <body>\n  <div style=\"height:200px\"></div>\n </body>", "MCQ Answer": "B", "option A": "radial, white, green", "option B": "circle, white, green", "option C": "circle, green, white", "option D": "radial, green, white"},
+    {"No": "298", "question_text": "What are the names of different gradients in CSS?", "MCQ Answer": "A", "option A": "Linear Gradients, Radial \nGradients, and Conic \nGradients", "option B": "Linear Gradients, Vertical \nGradients, and Corner \nGradients", "option C": "Horizontal Gradients, \nVertical Gradients, and \nConic Gradients", "option D": "Linear Gradients, Radial \nGradients, Vertical \nGradients, and Conic \nGradients"},
+    {"No": "299", "question_text": "Which of the following css property is used to define the time it takes one iteration of an animation to play?", "MCQ Answer": "B", "option A": "control", "option B": "animation-duration", "option C": "transition-time", "option D": "all of the mentioned"},
+    {"No": "300", "question_text": "Which of the following css property is used to indicate if an animation \nplays in reverse or repeats itself every other iteration?", "MCQ Answer": "C", "option A": "animation-iteration", "option B": "animation-check", "option C": "animation-direction", "option D": "animation-state"},
+    {"No": "301", "question_text": "Which of the following css property allows elements to be rotated, scaled, and skewed in a variety of different ways?", "MCQ Answer": "A", "option A": "transform", "option B": "transform-3D", "option C": "transform-origin", "option D": "transition"},
+    {"No": "302", "question_text": "Which of the following property defines the number of columns in a multicolumn text flow?", "MCQ Answer": "D", "option A": "column", "option B": "column-flow", "option C": "column-number", "option D": "column-count"},
+    {"No": "303", "question_text": "Which of the following property defines the gap between columns in a multicolumn text flow?", "MCQ Answer": "B", "option A": "column-rule-flow", "option B": "column-gap", "option C": "column-rule", "option D": "None"},
+    {"No": "304", "question_text": "Which CSS property sets the opacity for the whole element?", "MCQ Answer": "C", "option A": "fade", "option B": "opacity-value", "option C": "opacity", "option D": "background-opacity"},
+    {"No": "305", "question_text": "Which of the following transform property value defines a 2D translation?", "MCQ Answer": "A", "option A": "translate(x,y)", "option B": "translate2D(x,y)", "option C": "translate3D(x,y)", "option D": "all of the mentioned"},
+    {"No": "306", "question_text": "Which of the following is NOT a valid value for the CSS property transition-timing-function?", "MCQ Answer": "D", "option A": "ease", "option B": "linear", "option C": "step-end", "option D": "smooth"},
+    {"No": "307", "question_text": "Which of the following is a valid value for transition-timing-function?", "MCQ Answer": "C", "option A": "smooth", "option B": "fast-slow", "option C": "ease-in-out", "option D": "step-linear"},
+    {"No": "308", "question_text": "What function is used to insert values of a CSS variable?", "MCQ Answer": "A", "option A": "var()", "option B": "rand()", "option C": "varchar()", "option D": "calc()"},
+    {"No": "309", "question_text": "What will the following CSS code do when the <div> element is hovered?\ndiv {\n height:200px;\n width:200px;\n border:1px solid black;\n transition: transform 0.3s;\n }\n div:hover {\n  transform: scale(1.2);\n}", "MCQ Answer": "B", "option A": "The <div> will rotate 1.2 \ndegrees vertically over 0.3 \nseconds.", "option B": "The <div> will grow to 1.2 \ntimes its original size over \n0.3 seconds.", "option C": "The <div> will move \nhorizontally by 1.2 times its \nwidth over 0.3 seconds.", "option D": "The <div> will rotate 1.2 \ndegrees vertically & \nhorizontally over 0.3 \nseconds."},
+    {"No": "310", "question_text": "How to rotate a div with id mydiv by 30deg?", "MCQ Answer": "C", "option A": "#mydiv{ rotate:30deg;}", "option B": "#mydiv{transform:30deg;}", "option C": "#mydiv{transform:rotate(30deg);}", "option D": "#mydiv{transform:rotation(30deg);}"}
+];
+
+
+        let currentScreen = 'loader';
+        let currentTestIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+        
+        const screens = {
+            'loader': document.getElementById('loader'),
+            'menu': document.getElementById('menu-screen'),
+            'view-mode': document.getElementById('view-mode-screen'),
+            'test-mode': document.getElementById('test-mode-screen')
+        };
+
+        // --- Core Functions ---
+        function showScreen(screenId) {
+            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+            
+            // Special case for returning to menu
+            if (screenId === 'menu') {
+                // Find the main-container that is a direct child of the body's main-container
+                document.querySelector('.main-container > .main-container').classList.remove('hidden');
+            }
+
+            screens[screenId].classList.remove('hidden');
+            currentScreen = screenId;
+
+            if (screenId === 'view-mode') {
+                initViewMode();
+            } else if (screenId === 'test-mode') {
+                startTest();
+            }
+        }
+        
+        function escapeHTML(str) {
+            if (!str) return "";
+            // Use regex to handle code snippets
+            str = str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            // Basic newline to <br> for pre-like formatting
+            str = str.replace(/\n/g, "<br>");
+            return str;
+        }
+
+        // --- View Mode ---
+        function initViewMode() {
+            const container = document.getElementById('view-questions-container');
+            container.innerHTML = '';
+            questions.forEach(q => {
+                const correctAnswer = q["MCQ Answer"];
+                const optionsHTML = ['A', 'B', 'C', 'D'].map(opt => {
+                    const optionText = q[`option ${opt}`];
+                    if (optionText === null || optionText === undefined) return '';
+                    const isCorrect = opt === correctAnswer;
+                    return `<div class="p-3 rounded-lg ${isCorrect ? 'bg-green-100 border-l-4 border-green-500 font-semibold' : 'bg-slate-100'}">
+                                <strong>${opt}.</strong> <pre class="code-block !p-0 !bg-transparent inline">${escapeHTML(optionText)}</pre>
+                            </div>`;
+                }).join('');
+
+                // Check if question text contains newlines
+                let questionHTML = escapeHTML(q.question_text);
+                if (questionHTML.includes('<br>')) {
+                    questionHTML = `<pre class="code-block">${questionHTML}</pre>`;
+                }
+
+                const questionCard = `
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                        <h3 class="font-semibold text-lg mb-4">Q${q.No}: ${questionHTML}</h3>
+                        <div class="space-y-3">${optionsHTML}</div>
+                    </div>
+                `;
+                container.innerHTML += questionCard;
+            });
+        }
+
+        // --- Test Mode ---
+        function shuffleArray(array) {
+            let currentIndex = array.length,  randomIndex;
+            // While there remain elements to shuffle.
+            while (currentIndex != 0) {
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startTest() {
+            currentTestIndex = 0;
+            score = 0;
+            shuffledQuestions = shuffleArray([...questions]); // Shuffle questions for the test
+            document.getElementById('test-card').classList.remove('hidden');
+            document.getElementById('test-results').classList.add('hidden');
+            loadTestQuestion();
+        }
+
+        function loadTestQuestion() {
+            if (currentTestIndex >= shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const q = shuffledQuestions[currentTestIndex];
+            const testCard = document.getElementById('test-card');
+            const progress = ((currentTestIndex + 1) / shuffledQuestions.length) * 100;
+
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `Question ${currentTestIndex + 1}/${shuffledQuestions.length}`;
+
+            const optionsHTML = ['A', 'B', 'C', 'D'].map(opt => {
+                const optionText = q[`option ${opt}`];
+                if (optionText === null || optionText === undefined) return '';
+                return `<button class="option-btn text-left w-full p-4 font-medium rounded-lg" onclick="selectAnswer(this, '${opt}', '${q['MCQ Answer']}')">
+                            <strong>${opt}.</strong> <pre class="code-block !p-0 !bg-transparent inline">${escapeHTML(optionText)}</pre>
+                        </button>`;
+            }).join('');
+
+            // Check if question text contains newlines
+            let questionHTML = escapeHTML(q.question_text);
+            if (questionHTML.includes('<br>')) {
+                questionHTML = `<pre class="code-block">${questionHTML}</pre>`;
+            }
+
+            testCard.innerHTML = `
+                <p class="text-xl font-medium text-slate-800 mb-6">Q${q.No}: ${questionHTML}</p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${optionsHTML}
+                </div>
+                <div class="mt-8 text-right">
+                     <button id="next-btn" onclick="nextQuestion()" class="btn bg-blue-600 text-white font-bold py-2 px-8 rounded-lg hidden">Next</button>
+                </div>
+            `;
+        }
+        
+        function selectAnswer(btn, selectedOpt, correctOpt) {
+            const optionsContainer = document.getElementById('options-container');
+            const allOptions = optionsContainer.querySelectorAll('button');
+
+            allOptions.forEach(optBtn => {
+                optBtn.disabled = true;
+                const optionLetter = optBtn.textContent.trim().split('.')[0];
+                if (optionLetter === correctOpt) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOpt === correctOpt) {
+                score++;
+            } else {
+                btn.classList.add('incorrect');
+            }
+
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentTestIndex++;
+            loadTestQuestion();
+        }
+
+        function showResults() {
+             document.getElementById('test-card').classList.add('hidden');
+             const resultsContainer = document.getElementById('test-results');
+             resultsContainer.classList.remove('hidden');
+             document.getElementById('score-text').textContent = `${score}/${shuffledQuestions.length}`;
+             document.getElementById('progress-bar').style.width = '100%';
+             document.getElementById('progress-text').textContent = `Test Complete!`;
+        }
+
+        // --- Initial Load ---
+        window.onload = () => {
+            setTimeout(() => {
+                screens.loader.style.opacity = '0';
+                setTimeout(() => showScreen('menu'), 500); // Show menu after fade out
+            }, 1500); // Show loader for 1.5 seconds
+        };
+    </script>
+</body>
+</html>
+
+
+
